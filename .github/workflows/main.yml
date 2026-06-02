@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-node@v4 # sets up a node environment for use in actions by adding it to the PATH and optionally caching npm modules
         with:
           node-version: "24.13" # node version change as per your choice
-
+          
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Build an image from Dockerfile
@@ -23,6 +23,7 @@ jobs:
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
           docker push docker.io/9492925563/github-action-demo:${{ github.sha }}
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -33,3 +34,15 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
       
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Test cluster connection
+        run: |
+          kubectl get nodes
