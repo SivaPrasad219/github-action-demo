@@ -1,4 +1,4 @@
-FROM nodejs-alpine:latest
+FROM nodejs:24-alpine
 WORKDIR /app
 COPY package.json /app/
 COPY package-lock.json /app/
