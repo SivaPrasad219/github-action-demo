@@ -25,7 +25,7 @@ jobs:
     - uses: mr-smithers-excellent/docker-build-push@v7
       name: Build & push Docker image
       with:
-        image: 9492924463/demo
+        image: 949295563/github-action-demo
         tag: ci-${{ github.sha }}, latest
         registry: docker.io
         username: ${{ secrets.DOCKER_USERNAME }}
