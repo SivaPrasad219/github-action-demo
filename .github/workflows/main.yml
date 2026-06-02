@@ -14,16 +14,22 @@ jobs:
         uses: actions/setup-node@v4 # sets up a node environment for use in actions by adding it to the PATH and optionally caching npm modules
         with:
           node-version: "24.13" # node version change as per your choice
-      # - name: npm install, build, and test
-      #   run: |
-      #     npm install
-      #     npm run dev
 
-      - uses: mr-smithers-excellent/docker-build-push@v7
-        name: Build & push Docker image
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build an image from Dockerfile
+        run: docker build -t docker.io/9492925563/github-action-demo:${{ github.sha }} .
+      - name: Push image to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push docker.io/9492925563/github-action-demo:${{ github.sha }}
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image: 9492925563/github-action-demo
-          tag: ci-${{ github.sha }}, latest
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          image-ref: 'docker.io/9492925563/github-action-demo:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+      
