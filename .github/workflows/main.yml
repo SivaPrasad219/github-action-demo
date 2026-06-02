@@ -34,19 +34,11 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
       
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Setup kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-
-      - name: Debug connectivity
-        run: |
-          curl -k -m 10 https://172.168.9.124:6443/version || true
-          
-      - name: Test cluster connection
-        run: |
-          kubectl get nodes
+      - name: Test cluster connection via build node
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.BUILDNODE_HOST }}
+          username: ${{ secrets.BUILDNODE_USER }}
+          key: ${{ secrets.BUILDNODE_SSH_KEY }}
+          script: |
+            kubectl get nodes
