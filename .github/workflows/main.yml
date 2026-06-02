@@ -43,6 +43,10 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
+      - name: Debug connectivity
+        run: |
+          curl -k -m 10 https://172.168.9.124:6443/version || true
+          
       - name: Test cluster connection
         run: |
           kubectl get nodes
